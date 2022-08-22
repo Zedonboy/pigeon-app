@@ -1,0 +1,246 @@
+#pragma version 5
+txn ApplicationID
+int 0
+==
+bnz main_l25
+txn OnCompletion
+int OptIn
+==
+bnz main_l24
+txn OnCompletion
+int CloseOut
+==
+bnz main_l23
+txn OnCompletion
+int UpdateApplication
+==
+bnz main_l22
+txn OnCompletion
+int DeleteApplication
+==
+bnz main_l21
+txn OnCompletion
+int NoOp
+==
+bnz main_l7
+err
+main_l7:
+txna ApplicationArgs 0
+byte "register_member"
+==
+bnz main_l20
+txna ApplicationArgs 0
+byte "apply_project"
+==
+bnz main_l16
+txna ApplicationArgs 0
+byte "end_project"
+==
+bnz main_l15
+txna ApplicationArgs 0
+byte "vote_proposal"
+==
+bnz main_l14
+txna ApplicationArgs 0
+byte "optin_asset"
+==
+bnz main_l13
+err
+main_l13:
+itxn_begin
+int axfer
+itxn_field TypeEnum
+global CurrentApplicationAddress
+itxn_field AssetReceiver
+int 0
+itxn_field AssetAmount
+txna Assets 0
+itxn_field XferAsset
+itxn_submit
+int 1
+return
+main_l14:
+txna Accounts 1
+byte "participation"
+txna Accounts 1
+byte "participation"
+app_local_get
+int 1
++
+app_local_put
+int 1
+return
+main_l15:
+int 1
+return
+main_l16:
+txna Assets 0
+asset_params_get AssetName
+store 13
+store 12
+global CreatorAddress
+txn Sender
+b==
+assert
+txna Assets 0
+asset_params_get AssetCreator
+store 15
+store 14
+txna Accounts 1
+txna Assets 0
+asset_holding_get AssetBalance
+store 17
+store 16
+txna Assets 0
+asset_params_get AssetTotal
+store 19
+store 18
+load 15
+assert
+load 14
+global CreatorAddress
+b==
+assert
+load 18
+int 1
+==
+assert
+load 17
+assert
+load 13
+assert
+txna Accounts 1
+byte "lang"
+app_local_get
+assert
+txna Accounts 2
+byte "lang"
+app_local_get
+load 12
+b==
+assert
+txna Accounts 1
+byte "max-dev"
+app_local_get
+bnz main_l19
+txna Accounts 2
+byte "dev-len"
+app_local_get
+txna Accounts 2
+byte "max-dev"
+app_local_get
+<=
+assert
+main_l18:
+txna Accounts 2
+txna Accounts 1
+int 1
+app_local_put
+txna Accounts 2
+byte "dev-len"
+txna Accounts 1
+byte "dev-len"
+app_local_get
+int 1
++
+app_local_put
+int 1
+return
+main_l19:
+txna Accounts 2
+byte "dev-len"
+app_local_get
+int 11
+<
+assert
+b main_l18
+main_l20:
+txna Assets 0
+asset_params_get AssetCreator
+store 7
+store 6
+txn Sender
+txna Assets 0
+asset_holding_get AssetBalance
+store 9
+store 8
+txna Assets 0
+asset_params_get AssetTotal
+store 11
+store 10
+load 7
+assert
+load 6
+global CreatorAddress
+b==
+assert
+load 10
+int 1
+==
+assert
+load 9
+assert
+txn Sender
+byte "member"
+txna Assets 0
+app_local_put
+itxn_begin
+int axfer
+itxn_field TypeEnum
+txn Sender
+itxn_field AssetReceiver
+int 2
+itxn_field AssetAmount
+txna Assets 0
+itxn_field XferAsset
+itxn_submit
+int 1
+return
+main_l21:
+global CreatorAddress
+txn Sender
+b==
+assert
+int 1
+return
+main_l22:
+global CreatorAddress
+txn Sender
+b==
+assert
+int 1
+return
+main_l23:
+int 1
+return
+main_l24:
+txna Assets 0
+asset_params_get AssetCreator
+store 1
+store 0
+txn Sender
+txna Assets 0
+asset_holding_get AssetBalance
+store 3
+store 2
+txna Assets 0
+asset_params_get AssetTotal
+store 5
+store 4
+load 1
+assert
+load 0
+global CreatorAddress
+b==
+assert
+load 4
+int 1
+==
+assert
+load 3
+assert
+int 1
+return
+main_l25:
+int 1
+return
