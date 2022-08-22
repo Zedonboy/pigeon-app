@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react";
 import { AlgoClientContext } from "../../App";
-import { PROPOSAL_APP_ID } from "@/config";
+import { PROPOSAL_APP_ID } from "../../config";
 
 export default function Proposals() {
   let client = useContext(AlgoClientContext);
