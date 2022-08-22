@@ -1,7 +1,6 @@
 import { useState, createContext, useEffect } from "react";
 import { HashRouter, Routes, Route } from "react-router-dom";
 import DashboardHome from "./pages/Dashboard/Home";
-import Home from "./pages/AppHome";
 import WalletConnect from "@walletconnect/client";
 import { Algodv2 } from "algosdk";
 import Login from "./pages/Login";

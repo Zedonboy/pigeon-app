@@ -13,31 +13,6 @@ import { AlgoClientContext, WalletConnectContext } from "../App";
 import { DAO_DAPP_ID, PARTICIPATION_ASSET_ID } from "../config";
 import { AccountAtom, ContextAtom } from "../utils/atoms";
 
-
-async function sign(txn : algosdk.Transaction, connector : WalletConnect) {
-  const txns = [txn]
-const txnsToSign = txns.map(txn => {
-  const encodedTxn = Buffer.from(algosdk.encodeUnsignedTransaction(txn)).toString("base64");
-
-  return {
-    txn: encodedTxn,
-    message: 'Description of transaction being signed',
-    // Note: if the transaction does not need to be signed (because it's part of an atomic group
-    // that will be signed by another party), specify an empty singers array like so:
-    // signers: [],
-  };
-});
-
-const requestParams = [txnsToSign];
-
-const request = formatJsonRpcRequest("algo_signTxn", requestParams);
-const result: Array<string | null> = await connector.sendCustomRequest(request);
-const decodedResult = result.map(element => {
-  return element ? new Uint8Array(Buffer.from(element, "base64")) : null;
-});
-
-return decodedResult
-}
 export default function Login() {
   let connector = useContext(WalletConnectContext);
   let [account, setAccount] = useRecoilState(AccountAtom);
