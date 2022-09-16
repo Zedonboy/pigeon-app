@@ -1,4 +1,4 @@
-import { useState, createContext, useEffect } from "react";
+import React, { useState, createContext, useEffect, Suspense } from "react";
 import { HashRouter, Routes, Route } from "react-router-dom";
 import DashboardHome from "./pages/Dashboard/Home";
 import WalletConnect from "@walletconnect/client";
@@ -15,6 +15,8 @@ import Cards from "./pages/Dashboard/IDCard";
 import Createproject from "./pages/Dashboard/CreateProject";
 import SecretTokenPage from "./pages/Dashboard/SecretToken";
 import VerifyPage from "./pages/Dashboard/Verify";
+
+const VeifyComponent = React.lazy(() => import( "./pages/Dashboard/Verify"));
 const port = "";
 const token = {
   "X-API-Key": "OGKyWzuveD7K0pEzegBu12PMwLe7SfV154aBTF8o",
@@ -89,7 +91,13 @@ function App() {
               <Route path="cards" element={<Cards/>}/>
               <Route path="create-project" element={<Createproject/>}/>
               <Route path="secret" element={<SecretTokenPage/>}/>
-              <Route path="verify" element={<VerifyPage/>}/>
+              <Route path="verify" element={
+                <div>
+                  <Suspense fallback={<div>Loading...</div>}>
+                    <VeifyComponent/>
+                  </Suspense>
+                </div>
+              }/>
             </Route>
           </Routes>
         </HashRouter>
