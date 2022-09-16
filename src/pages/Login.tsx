@@ -31,8 +31,10 @@ export default function Login() {
       ]?.find((v: ApplicationLocalState) => v.id === DAO_DAPP_ID);
       //@ts-ignore
       let TKV = appState?.["key-value"]?.find((k) => atob(k.key) === "member");
+       //@ts-ignore
+      let VerifiedTKV = appState?.["key-value"]?.find(k => atob(k.key) === "verified")
       if (TKV) {
-        setContext({ ...context, memberId: TKV.value.uint as number });
+        setContext({ ...context, memberId: TKV.value.uint as number, verified: VerifiedTKV?.value?.uint && (VerifiedTKV?.value?.uint === 1) ? true : false});
         // move to next screen
         navigator("/app");
       } else {

@@ -13,7 +13,7 @@ import {
 } from "@heroicons/react/outline";
 import { AlgoClientContext, WalletConnectContext } from "../../App";
 import { useRecoilValue } from "recoil";
-import { AccountAtom } from "../../utils/atoms";
+import { AccountAtom, ContextAtom } from "../../utils/atoms";
 import { Outlet, useNavigate } from "react-router-dom";
 import { PARTICIPATION_ASSET_ID } from "../../config";
 
@@ -21,7 +21,12 @@ const navigation = [
   { name: "Dashboard", href: "/#/app", icon: HomeIcon, current: true },
   // { name: "Projects", href: "#", icon: UsersIcon, current: false },
   { name: "Cards", href: "/#/app/cards", icon: FolderIcon, current: false },
-  { name: "Create Project", href: "/#/app/create-project", icon: UsersIcon, current: false }
+  {
+    name: "Create Project",
+    href: "/#/app/create-project",
+    icon: UsersIcon,
+    current: false,
+  },
 ];
 
 function classNames(...classes: any[]) {
@@ -31,27 +36,28 @@ function classNames(...classes: any[]) {
 export default function DashboardHome() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   let connector = useContext(WalletConnectContext);
-  let client = useContext(AlgoClientContext)
-  let account = useRecoilValue(AccountAtom)
-  let navigator = useNavigate()
-  let [PGPT, setPGPT] = useState(0)
-  if(!account) {
-    navigator("/")
-    return null
+  let client = useContext(AlgoClientContext);
+  let account = useRecoilValue(AccountAtom);
+  let context = useRecoilValue(ContextAtom);
+  let navigator = useNavigate();
+  let [PGPT, setPGPT] = useState(0);
+  if (!account) {
+    navigator("/");
+    return null;
   }
 
   useEffect(() => {
-    let task =async () => {
-      let assetInfo = await client?.accountAssetInformation(account!!, PARTICIPATION_ASSET_ID).do()
-      setPGPT(assetInfo?.["asset-holding"]["amount"] || 0)
-    }
+    let task = async () => {
+      let assetInfo = await client
+        ?.accountAssetInformation(account!!, PARTICIPATION_ASSET_ID)
+        .do();
+      setPGPT(assetInfo?.["asset-holding"]["amount"] || 0);
+    };
 
-    task()
-   
-  }, [])
+    task();
+  }, []);
   return (
     <>
-    
       <div>
         <Transition.Root show={sidebarOpen} as={Fragment}>
           <Dialog
@@ -201,16 +207,16 @@ export default function DashboardHome() {
               <a href="#" className="flex-shrink-0 w-full group block">
                 <div className="flex items-center">
                   <div>
-                    <img
+                    {/* <img
                       className="inline-block h-9 w-9 rounded-full"
                       src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
                       alt=""
-                    />
+                    /> */}
                   </div>
                   <div className="ml-3">
-                    <p className="text-sm font-medium text-white">Tom Cook</p>
+                    <p className="text-sm font-medium text-white">Test Net</p>
                     <p className="text-xs font-medium text-indigo-200 group-hover:text-white">
-                      View profile
+                      
                     </p>
                   </div>
                 </div>
@@ -233,12 +239,9 @@ export default function DashboardHome() {
             <div className="py-6">
               <div className="w-full mx-auto flex px-4 sm:px-6 md:px-8">
                 {connector?.connected ? (
-                   <div
-                 
-                   className="inline-flex items-center px-3 py-2 border text-sm leading-4 font-medium rounded-md shadow-sm text-green-500 border-emerald-500 bg-green-100"
-                 >
-                   Connected
-                 </div>
+                  <div className="inline-flex items-center px-3 py-2 border text-sm leading-4 font-medium rounded-md shadow-sm text-green-500 border-emerald-500 bg-green-100">
+                    Connected
+                  </div>
                 ) : (
                   <button
                     onClick={(e) => {
@@ -252,14 +255,54 @@ export default function DashboardHome() {
                     Connect Wallet
                   </button>
                 )}
-                <div className="ml-6 text-sm"><span className="text-2xl font-bold text-indigo-500">{PGPT}</span> Participation Token</div>
+                <div className="ml-6 text-sm">
+                  <span className="text-2xl font-bold text-indigo-500">
+                    {PGPT}
+                  </span>{" "}
+                  Participation Token
+                </div>
               </div>
+              {context.verified ? null : (
+                <section className="bg-yellow-500 mt-2 py-3 px-6 text-black flex justify-between">
+                  <div></div>
+                  <div className="flex space-x-2">
+                    <p>We don't know if you are a bot. please verify</p>
+                    <button
+                      onClick={(e) => {
+                        navigator("verify");
+                      }}
+                      className="inline-flex bg-transparent items-center rounded border border-black px-2.5 py-1.5 text-xs font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                    >
+                      Verify
+                    </button>
+                  </div>
+                  <div>
+                    <button onClick={(e) => {}}>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="w-6 h-6"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M6 18L18 6M6 6l12 12"
+                        />
+                      </svg>
+                    </button>
+                  </div>
+                </section>
+              )}
+
               <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
                 {/* Replace with your content */}
-               
+
                 <div className="py-4">
-                  <div className="border-4 border-dashed border-gray-200 rounded-lg h-96" >
-                  <Outlet/>
+                  <div className="border-4 border-dashed border-gray-200 rounded-lg h-96">
+                    <Outlet />
                   </div>
                 </div>
                 {/* /End replace */}

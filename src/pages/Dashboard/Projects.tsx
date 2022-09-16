@@ -26,12 +26,25 @@ export default function Projects() {
       }
       for (let index = 0; index < projects.length; index++) {
         const element = projects[index];
-        let assetInfo: any = await client
+        let assetInfo: any
+        try {
+          assetInfo = await client
           ?.accountAssetInformation(element.address, parseInt(element.assetId))
           .do();
-        let anotherAssetInfo = await client?.getAssetByID(parseInt(element.assetId)).do()
-        let amount = assetInfo["asset-holding"]["amount"];
-        let name = anotherAssetInfo?.["params"]["unit-name"];
+        } catch(err) {
+          assetInfo = null
+        }
+
+        let anotherAssetInfo : any 
+        try {
+          anotherAssetInfo = await client?.getAssetByID(parseInt(element.assetId)).do()
+        } catch(err) {
+          anotherAssetInfo = null
+        }
+       
+        
+        let amount = assetInfo?.["asset-holding"]?.["amount"] || -1
+        let name = anotherAssetInfo?.["params"]?.["unit-name"] || "Does not Exist"
         element.amount = amount;
         element.unitName = name;
       }
@@ -74,97 +87,99 @@ export default function Projects() {
             </section>
           );
 
-        return projectArr?.map((v) => (
-          <section className="grid grid-cols-3 gap-4 p-4">
-          <div className="p-6 max-w-sm bg-white rounded-lg border border-gray-200 shadow-md">
-            <a href="#">
-              <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900">
-                {v.title}
-              </h5>
-            </a>
-            <p className="mb-3 font-normal text-gray-700">
-              {v.summary}
-            </p>
-            <p className="text-green-500 text-sm">
-              {v.amount} {v.unitName}
-            </p>
-            <button
-              onClick={(e) => {
-                if (!acount) return;
-                let task = async () => {
-                  let params = await client!!.getTransactionParams().do();
-                  let txn =
-                    algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
-                      from: acount as string,
-                      amount: 1,
-                      assetIndex: PARTICIPATION_ASSET_ID,
-                      to: v.address,
-                      suggestedParams: params,
-                    });
-
-                  let txns = [txn];
-                  const txnsToSign = txns.map((txn) => {
-                    const encodedTxn = Buffer.from(
-                      algosdk.encodeUnsignedTransaction(txn)
-                    ).toString("base64");
-
-                    return {
-                      txn: encodedTxn,
-                      message: "Description of transaction being signed",
-                      // Note: if the transaction does not need to be signed (because it's part of an atomic group
-                      // that will be signed by another party), specify an empty singers array like so:
-                      // signers: [],
-                    };
-                  });
-
-                  const requestParams = [txnsToSign];
-                  const request = formatJsonRpcRequest(
-                    "algo_signTxn",
-                    requestParams
-                  );
-                  const result: Array<string | null> = await connector?.sendCustomRequest(request);
-                  const decodedResult = result.map((element : any) => {
-                    return new Uint8Array(Buffer.from(element, "base64"));
-                  });
-
-                  let {txId} = await client!!.sendRawTransaction(decodedResult).do()
-                  let resp = await applyProject(context, txId)
-                  if(resp.ok) {
-                    return true
-                  } else {
-                    let data = await resp.json()
-                    throw new Error(data.error.message || "Something is wrong")
-                  }
-                };
-
-                task().then(d => {
-                  toast.success("Successful")
-                }).catch(err => {
-                  toast.error(err.message)
-                }).finally(() => {
-                  setCounter(counter + 1)
-                })
-              }}
-              className="inline-flex items-center py-2 px-3 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
-            >
-              Apply
-              <svg
-                aria-hidden="true"
-                className="ml-2 -mr-1 w-4 h-4"
-                fill="currentColor"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <path
-                  fill-rule="evenodd"
-                  d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
-                  clip-rule="evenodd"
-                ></path>
-              </svg>
-            </button>
-          </div>
-          </section>
-        ));
+        return (<section className="grid grid-cols-3 gap-4 p-4">
+          {projectArr.map(v => (
+             <div className="p-6 max-w-sm bg-white rounded-lg border border-gray-200 shadow-md">
+             <a href="#">
+               <h5 className="mb-2 text-2xl font-bold tracking-tight text-gray-900">
+                 {v.title}
+               </h5>
+             </a>
+             <p className="mb-3 font-normal text-gray-700">
+               {v.summary}
+             </p>
+             <p className="text-green-500 text-sm">
+               {v.amount} {v.unitName}
+             </p>
+             <button
+             disabled={v.amount === -1}
+               onClick={(e) => {
+                 if (!acount) return;
+                 let task = async () => {
+                   let params = await client!!.getTransactionParams().do();
+                   let txn =
+                     algosdk.makeAssetTransferTxnWithSuggestedParamsFromObject({
+                       from: acount as string,
+                       amount: 1,
+                       assetIndex: PARTICIPATION_ASSET_ID,
+                       to: v.address,
+                       suggestedParams: params,
+                     });
+   
+                   let txns = [txn];
+                   const txnsToSign = txns.map((txn) => {
+                     const encodedTxn = Buffer.from(
+                       algosdk.encodeUnsignedTransaction(txn)
+                     ).toString("base64");
+   
+                     return {
+                       txn: encodedTxn,
+                       message: "Description of transaction being signed",
+                       // Note: if the transaction does not need to be signed (because it's part of an atomic group
+                       // that will be signed by another party), specify an empty singers array like so:
+                       // signers: [],
+                     };
+                   });
+   
+                   const requestParams = [txnsToSign];
+                   const request = formatJsonRpcRequest(
+                     "algo_signTxn",
+                     requestParams
+                   );
+                   const result: Array<string | null> = await connector?.sendCustomRequest(request);
+                   const decodedResult = result.map((element : any) => {
+                     return new Uint8Array(Buffer.from(element, "base64"));
+                   });
+   
+                   let {txId} = await client!!.sendRawTransaction(decodedResult).do()
+                   let resp = await applyProject(context, txId)
+                   if(resp.ok) {
+                     return true
+                   } else {
+                     let data = await resp.json()
+                     throw new Error(data.error.message || "Something is wrong")
+                   }
+                 };
+   
+                 task().then(d => {
+                   toast.success("Successful")
+                 }).catch(err => {
+                   toast.error(err.message)
+                 }).finally(() => {
+                   setCounter(counter + 1)
+                 })
+               }}
+               className="inline-flex items-center py-2 px-3 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+             >
+               {v.amount === -1 ? "Do not Apply" : "Apply"}
+               <svg
+                 aria-hidden="true"
+                 className="ml-2 -mr-1 w-4 h-4"
+                 fill="currentColor"
+                 viewBox="0 0 20 20"
+                 xmlns="http://www.w3.org/2000/svg"
+               >
+                 <path
+                   fill-rule="evenodd"
+                   d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z"
+                   clip-rule="evenodd"
+                 ></path>
+               </svg>
+             </button>
+           </div>
+          ))}
+       
+        </section>)
       })()}
     </>
   );

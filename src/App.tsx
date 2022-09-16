@@ -8,11 +8,13 @@ import { RecoilRoot, useSetRecoilState } from "recoil";
 import { ToastContainer } from "react-toastify";
 import QRCodeModal from "algorand-walletconnect-qrcode-modal";
 import {eventBus} from "./utils/eventbus"
-import { AccountAtom } from "./utils/atoms";
+import { AccountAtom, SecretAtom } from "./utils/atoms";
 import 'react-toastify/dist/ReactToastify.css';
 import Projects from "./pages/Dashboard/Projects";
 import Cards from "./pages/Dashboard/IDCard";
 import Createproject from "./pages/Dashboard/CreateProject";
+import SecretTokenPage from "./pages/Dashboard/SecretToken";
+import VerifyPage from "./pages/Dashboard/Verify";
 const port = "";
 const token = {
   "X-API-Key": "OGKyWzuveD7K0pEzegBu12PMwLe7SfV154aBTF8o",
@@ -86,6 +88,8 @@ function App() {
               <Route index element={<Projects/>}/>
               <Route path="cards" element={<Cards/>}/>
               <Route path="create-project" element={<Createproject/>}/>
+              <Route path="secret" element={<SecretTokenPage/>}/>
+              <Route path="verify" element={<VerifyPage/>}/>
             </Route>
           </Routes>
         </HashRouter>

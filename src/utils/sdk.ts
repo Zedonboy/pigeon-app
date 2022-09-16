@@ -18,12 +18,12 @@ export function getProject() {
     return fetch(`${API_URL}/projects`)
 }
 
-export function createProject(ctx : IContext, txnId : string, project : {summary: string, name: string, assetId: string}, algostate : {max_dev:number, github_issue: string, lang: string}) {
+export function createProject(ctx : IContext, txnId : string, project : {summary: string, title: string, assetId: string}, algostate : {max_dev:number, github_issue: string, lang: string}) {
     return fetch(`${API_URL}/projects`, {
         method: "POST",
         headers: {
             "Content-Type":"application/json",
-            "Network":ctx.network
+            // "Algorand-Network":ctx.network
         },
         body: JSON.stringify({
             txId: txnId,

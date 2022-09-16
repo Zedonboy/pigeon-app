@@ -11,6 +11,7 @@ export interface IProject {
 export interface IContext {
     network : string
     memberId: number
+    verified: boolean
 }
 
 export interface ICard {

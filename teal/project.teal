@@ -1,6 +1,6 @@
 #pragma version 5
 byte "bdhcbeyveuyfbewfewuifhuvfrhvocfj9efhruvbfvnojfd"
-txna ApplicationArgs 0
+arg 0
 b==
 assert
 int 1

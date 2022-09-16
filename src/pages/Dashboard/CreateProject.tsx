@@ -1,6 +1,7 @@
 import { formatJsonRpcRequest } from "@json-rpc-tools/utils";
 import algosdk from "algosdk";
 import { useContext, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import { useRecoilValue, useSetRecoilState } from "recoil";
 import { AlgoClientContext, WalletConnectContext } from "../../App";
@@ -14,12 +15,14 @@ let initial_state = {
   name: "",
   summary: "",
   assetId: 0,
-  lang: "",
+  lang: "P-DEV",
 };
 export default function Createproject() {
   const [formState, setFormState] = useState(initial_state);
   const client = useContext(AlgoClientContext)
   const account = useRecoilValue(AccountAtom)
+  let navigator = useNavigate()
+  // console.log(account)
   const connector = useContext(WalletConnectContext)
   const context = useRecoilValue(ContextAtom)
   const setSecret = useSetRecoilState(SecretAtom)
@@ -39,7 +42,7 @@ export default function Createproject() {
             let txn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
               from: account!!,
               to: DAO_CREATOR_ADDRESS,
-              amount: params.fee*10,
+              amount: 1000000*2,
               suggestedParams: params
             })
 
@@ -71,7 +74,7 @@ export default function Createproject() {
             let {txId} = await client!!.sendRawTransaction(decodedResult).do()
             let resp = await createProject(context, txId, {
               summary: formState.summary,
-              name: formState.name,
+              title: formState.name,
               assetId: formState.assetId.toString()
             }, {
               max_dev: formState.max_dev,
@@ -81,8 +84,11 @@ export default function Createproject() {
 
             if(resp.ok){
               let data = await resp.json()
-              setSecret(data.passcode)
+              setSecret(data)
               toast.success("Succesfull")
+              setTimeout(() => {
+                navigator("/app/secret")
+              }, 3000)
             } else {
               toast.error("Failed to connect to server.")
             }
@@ -92,7 +98,7 @@ export default function Createproject() {
           task().then(r => {
 
           }).catch(err => {
-
+            console.log(err)
           })
         }} className="mt-5 md:mt-0 md:col-span-2">
           <div className="grid grid-cols-6 gap-6">
@@ -190,6 +196,9 @@ export default function Createproject() {
               <input
                 type="text"
                 name="github-issue"
+                onChange={e => {
+                  setFormState({...formState, github_issue: e.target.value})
+                }}
                 id="github-issue"
                 className="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md"
               />
